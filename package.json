@@ -1,0 +1,98 @@
+{
+  "name": "vscode-coding-stats",
+  "displayName": "Coding Stats",
+  "version": "0.0.1-dev",
+  "engines": {
+    "vscode": "^1.34.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "*"
+  ],
+  "extensionDependencies": [
+    "vscode.git"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "Coding Stats Configuration",
+      "properties": {
+        "codingStats.uploadToken": {
+          "type": "string",
+          "default": "",
+          "description": "%cfg.uploadToken%"
+        },
+        "codingStats.serverUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:10345",
+          "description": "%cfg.serverUrl%"
+        },
+        "codingStats.computerId": {
+          "type": "string",
+          "default": "",
+          "description": "%cfg.computerId%"
+        },
+        "codingStats.localServerMode": {
+          "type": "boolean",
+          "default": true,
+          "description": "%cfg.localServerMode%"
+        },
+        "codingStats.moreThinkingTime": {
+          "type": "number",
+          "default": 0,
+          "description": "%cfg.moreThinkingTime%"
+        },
+        "codingStats.showStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "%cfg.showStatus%"
+        },
+        "codingStats.proxy": {
+          "type": [
+            "string",
+            "boolean"
+          ],
+          "default": "auto",
+          "enum": [
+            "auto",
+            "no-proxy",
+            false
+          ],
+          "description": "%cfg.proxy%"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "codingStats.showReport",
+        "category": "CodingStats",
+        "title": "%cmd.showReport%"
+      },
+      {
+        "command": "codingStats.startLocalServer",
+        "category": "CodingStats",
+        "title": "%cmd.startLocalServer%"
+      },
+      {
+        "command": "codingStats.stopLocalServer",
+        "category": "CodingStats",
+        "title": "%cmd.stopLocalServer%"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint . --ext .ts,.tsx",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.12",
+    "@types/node": "^16.7.4",
+    "@types/vscode": "^1.59.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.3",
+    "@typescript-eslint/parser": "^4.29.3",
+    "eslint": "^7.32.0",
+    "typescript": "^4.3.5",
+    "vsce": "^1.96.1"
+  }
+}
