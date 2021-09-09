@@ -16,11 +16,6 @@
     "configuration": {
       "title": "Coding Stats Configuration",
       "properties": {
-        "codingStats.uploadToken": {
-          "type": "string",
-          "default": "",
-          "description": "%cfg.uploadToken%"
-        },
         "codingStats.serverUrl": {
           "type": "string",
           "default": "http://127.0.0.1:10345",
