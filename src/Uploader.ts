@@ -16,10 +16,16 @@ export class Uploader {
   private isUploading = false;
   private noConnection = false;
 
+  private subscriptions: Array<StatusCallback> = [];
+
   private globalState: Memento|null = null;
 
   constructor(private settingsManager: SettingsManager) {
     this.gitHelper = new GitHelper();
+  }
+
+  public subscribe(callback: StatusCallback): void {
+    this.subscriptions.push(callback);
   }
 
   public init(globalState: Memento): void {
@@ -29,11 +35,14 @@ export class Uploader {
 
   public start(): void {
     this.enabled = true;
+    this.publishStatus();
+
     this.tryUploadingNextItem();
   }
 
   public stop(): void {
     this.enabled = false;
+    this.publishStatus();
   }
 
   public submitData(type: UploadDataType, document: TextDocument, trackingData: TrackingData): void {
@@ -78,7 +87,18 @@ export class Uploader {
     } else {
       this.uploadQueue.push(item);
     }
+    this.publishStatus();
     this.saveQueue();
+  }
+
+  private publishStatus(): void {
+    const status: UploaderStatus = {
+      enabled: this.enabled,
+      pendingItems: this.uploadQueue.length,
+      isUploading: this.isUploading,
+      noConnection: this.noConnection
+    };
+    this.subscriptions.forEach(callback => callback(status));
   }
 
   private getWorkspaceFolderOfDocument(document: TextDocument): string|void {
@@ -112,6 +132,7 @@ export class Uploader {
     } else {
       this.isUploading = false;
     }
+    this.publishStatus();
   }
 
   private uploadItem(uploadItem: UploadItem): void {
@@ -140,6 +161,7 @@ export class Uploader {
         Logger.warn(err);
 
         this.noConnection = true;
+        this.publishStatus();
 
         this.stop();
 
@@ -177,6 +199,7 @@ export class Uploader {
     if(queue) {
       Logger.info('load uploader queue...');
       this.uploadQueue = queue;
+      this.publishStatus();
     }
   }
 
@@ -214,4 +237,13 @@ type UploadItem = {
   linesDeleted: number;
   charsAdded: number;
   charsDeleted: number;
+}
+
+type StatusCallback = (status: UploaderStatus) => void;
+
+export type UploaderStatus = {
+  enabled: boolean;
+  pendingItems: number;
+  isUploading: boolean;
+  noConnection: boolean;
 }
