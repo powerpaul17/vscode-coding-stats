@@ -18,59 +18,63 @@
       "properties": {
         "codingStats.serverUrl": {
           "type": "string",
-          "default": "http://127.0.0.1:10345",
-          "description": "%cfg.serverUrl%"
+          "default": "http://127.0.0.1:10333",
+          "title": "%configuration.serverUrl.title%",
+          "description": "%configuration.serverUrl.description%"
+        },
+        "codingStats.port": {
+          "type": "number",
+          "default": 10333,
+          "title": "%configuration.port.title%",
+          "description": "%configuration.port.description%"
         },
         "codingStats.computerId": {
           "type": "string",
           "default": "",
-          "description": "%cfg.computerId%"
+          "title": "%configuration.computerId.title%",
+          "description": "%configuration.computerId.description%"
         },
         "codingStats.localServerMode": {
           "type": "boolean",
           "default": true,
-          "description": "%cfg.localServerMode%"
+          "title": "%configuration.localServerMode.title%",
+          "description": "%configuration.localServerMode.description%"
         },
-        "codingStats.moreThinkingTime": {
-          "type": "number",
-          "default": 0,
-          "description": "%cfg.moreThinkingTime%"
+        "codingStats.localServerDataDirectory": {
+          "type": "string",
+          "default": "",
+          "title": "%configuration.localServerDataDirectory.title%",
+          "description": "%configuration.localServerDataDirectory.description%"
         },
         "codingStats.showStatus": {
           "type": "boolean",
           "default": true,
-          "description": "%cfg.showStatus%"
+          "title": "%configuration.showStatus.title%",
+          "description": "%configuration.showStatus.description%"
         },
-        "codingStats.proxy": {
-          "type": [
-            "string",
-            "boolean"
-          ],
-          "default": "auto",
-          "enum": [
-            "auto",
-            "no-proxy",
-            false
-          ],
-          "description": "%cfg.proxy%"
+        "codingStats.debugLogging": {
+          "type": "boolean",
+          "default": false,
+          "title": "%configuration.debugLogging.title%",
+          "description": "%configuration.debugLogging.description%"
         }
       }
     },
     "commands": [
       {
         "command": "codingStats.showReport",
-        "category": "CodingStats",
-        "title": "%cmd.showReport%"
+        "category": "Coding Stats",
+        "title": "%command.showReport%"
       },
       {
         "command": "codingStats.startLocalServer",
-        "category": "CodingStats",
-        "title": "%cmd.startLocalServer%"
+        "category": "Coding Stats",
+        "title": "%command.startLocalServer%"
       },
       {
         "command": "codingStats.stopLocalServer",
-        "category": "CodingStats",
-        "title": "%cmd.stopLocalServer%"
+        "category": "Coding Stats",
+        "title": "%command.stopLocalServer%"
       }
     ]
   },

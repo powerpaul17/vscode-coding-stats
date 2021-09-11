@@ -1,0 +1,19 @@
+{
+  "configuration.serverUrl.title": "Server URL",
+  "configuration.serverUrl.description": "The URL of the backend server if the local server is not used.",
+  "configuration.port.title": "Port of local server",
+  "configuration.port.description": "The port of the local server.",
+  "configuration.computerId.title": "Computer ID",
+  "configuration.computerId.description": "The ID of the current VS Code instance.",
+  "configuration.localServerMode.title": "Local Server enabled?",
+  "configuration.localServerMode.description": "Determines if a local server instance should be started.",
+  "configuration.localServerDataDirectory.title": "Data directory",
+  "configuration.localServerDataDirectory.description": "The directory where the local server saves the database files.",
+  "configuration.showStatus.title": "Show Statusbar item",
+  "configuration.showStatus.description": "Show status of local server and upload queue in the statusbar?",
+  "configuration.debugLogging.title": "Debug logging",
+  "configuration.debugLogging.description": "Enables debug logging",
+  "command.showReport": "Show the Coding Stats report",
+  "command.startLocalServer": "Start local server",
+  "command.stopLocalServer": "Stop local server"
+}
