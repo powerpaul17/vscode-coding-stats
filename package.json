@@ -3,7 +3,7 @@
   "displayName": "Coding Stats",
   "version": "0.0.1-dev",
   "engines": {
-    "vscode": "^1.34.0"
+    "vscode": "^1.59.0"
   },
   "main": "./out/extension.js",
   "activationEvents": [
@@ -80,9 +80,11 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "esbuild-base": "npx esbuild ./src/extension.ts --outfile=out/extension.js --bundle --external:vscode --platform=node",
+    "compile": "npm run compile-dev -- --minify",
+    "compile-dev": "npm run esbuild-base -- --sourcemap",
     "lint": "eslint . --ext .ts,.tsx",
-    "watch": "tsc -watch -p ./"
+    "watch": "npm run esbuild-base -- --sourcemap --watch"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.12",
@@ -90,8 +92,9 @@
     "@types/vscode": "^1.59.0",
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
+    "esbuild": "^0.12.25",
     "eslint": "^7.32.0",
     "typescript": "^4.3.5",
-    "vsce": "^1.96.1"
+    "vsce": "^1.99.0"
   }
 }
