@@ -1,10 +1,13 @@
 import {ExtensionContext} from 'vscode';
+import {DataManager} from './DataManager';
 import {EventHandler} from './EventHandler';
 import {Logger} from './Logger';
 import {SettingsManager} from './SettingsManager';
 import {Uploader} from './Uploader';
 
 const settingsManager = new SettingsManager();
+
+const dataManager = new DataManager(settingsManager);
 
 const uploader = new Uploader(settingsManager);
 const eventHandler = new EventHandler(uploader);
