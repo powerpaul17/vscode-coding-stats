@@ -76,7 +76,30 @@
         "category": "Coding Stats",
         "title": "%command.stopLocalServer%"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codingStats",
+          "title": "Coding Stats",
+          "icon": "$(dashboard)"
+        }
+      ]
+    },
+    "views": {
+      "codingStats": [
+        {
+          "id": "codingStats.reposView",
+          "name": "%views.repos.name%",
+          "type": "tree"
+        },
+        {
+          "id": "codingStats.workspaceFoldersView",
+          "name": "%views.folders.name%",
+          "type": "tree"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -86,8 +109,13 @@
     "lint": "eslint . --ext .ts,.tsx",
     "watch": "npm run esbuild-base -- --sourcemap --watch"
   },
+  "dependencies": {
+    "moment": "^2.29.1",
+    "moment-duration-format": "^2.3.2"
+  },
   "devDependencies": {
     "@types/fs-extra": "^9.0.12",
+    "@types/moment-duration-format": "^2.2.3",
     "@types/node": "^16.7.4",
     "@types/vscode": "^1.59.0",
     "@typescript-eslint/eslint-plugin": "^4.29.3",

@@ -15,5 +15,7 @@
   "configuration.debugLogging.description": "Enables debug logging",
   "command.showReport": "Show the Coding Stats report",
   "command.startLocalServer": "Start local server",
-  "command.stopLocalServer": "Stop local server"
+  "command.stopLocalServer": "Stop local server",
+  "views.repos.name": "Repositories",
+  "views.folders.name": "Folders"
 }
