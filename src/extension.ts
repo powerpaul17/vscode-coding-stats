@@ -3,6 +3,7 @@ import {DataManager} from './DataManager';
 import {EventHandler} from './EventHandler';
 import {Logger} from './Logger';
 import {SettingsManager} from './SettingsManager';
+import {StatusBarManager} from './StatusBarManager';
 import {Uploader} from './Uploader';
 import {ReposViewProvider} from './views/ReposViewProvider';
 import {WorkspaceFoldersViewProvider} from './views/WorkspaceFoldersViewProvider';
@@ -13,6 +14,8 @@ const dataManager = new DataManager(settingsManager);
 
 const uploader = new Uploader(settingsManager);
 const eventHandler = new EventHandler(uploader);
+
+const statusBarManager = new StatusBarManager(settingsManager, uploader, dataManager);
 
 export function activate(context: ExtensionContext): void {
   const subscriptions = context.subscriptions;
