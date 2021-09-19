@@ -1,4 +1,5 @@
 import {Disposable, TextDocument, TextDocumentChangeEvent, TextDocumentContentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, TextEditorVisibleRangesChangeEvent, window, WindowState, workspace} from 'vscode';
+import {GitHelper} from './GitHelper';
 import {Logger} from './Logger';
 import {UploadDataType, Uploader} from './Uploader';
 
@@ -49,6 +50,9 @@ export class EventHandler {
   };
 
   private activeDocument: TextDocument|null = null;
+  private activeDocumentData: DocumentData|null = null
+
+  private gitHelper: GitHelper;
 
   constructor(private uploader: Uploader) {
     this.onActiveFileChange(window.activeTextEditor);
@@ -63,6 +67,8 @@ export class EventHandler {
     subscriptions.push(workspace.onDidChangeTextDocument(this.onFileChange.bind(this)));
 
     this.disposable = Disposable.from(...subscriptions);
+
+    this.gitHelper = new GitHelper();
   }
 
   public dispose(): void {
@@ -90,9 +96,45 @@ export class EventHandler {
     this.resetTrackingData();
 
     this.activeDocument = newDocument;
+    this.updateActiveDocumentData(newDocument);
 
     this.trackingData.openTimestamp = now;
     this.trackingData.lastReadingTimestamp = now;
+  }
+
+  private updateActiveDocumentData(document: TextDocument|null): void {
+    if(!document) {
+      this.activeDocumentData = null;
+    } else {
+      const gitInfo = this.gitHelper.getGitInfo(document.fileName);
+      this.activeDocumentData = {
+        fileName: workspace.asRelativePath(document.uri),
+        workspaceFolder: this.getWorkspaceFolderOfDocument(document) ?? undefined,
+        languageId: this.getLanguageOfDocument(document),
+        lineCount: document.lineCount,
+        charCount: document.getText().length,
+        repositoryName: gitInfo?.repo,
+        branchName: gitInfo?.branch
+      };
+    }
+  }
+
+  private getWorkspaceFolderOfDocument(document: TextDocument): string|void {
+    const uri = document.uri;
+    if(uri.scheme !== 'file') return;
+
+    const folder = workspace.getWorkspaceFolder(uri);
+    if(!folder) return;
+
+    return folder.uri.fsPath;
+  }
+
+  private getLanguageOfDocument(document: TextDocument): string {
+    switch(document.uri.scheme) {
+      case 'file':
+      default:
+        return document.languageId;
+    }
   }
 
   private onEditorSelectionChange(event: TextEditorSelectionChangeEvent): void {
@@ -203,10 +245,15 @@ export class EventHandler {
   }
 
   private uploadTrackingData(): void {
-    if(this.activeDocument && this.shouldUploadDocument()) {
+    if(this.activeDocumentData && this.shouldUploadDocument()) {
+      if(this.activeDocument) {
+        this.activeDocumentData.lineCount = this.activeDocument.lineCount;
+        this.activeDocumentData.charCount = this.activeDocument.getText().length;
+      }
+
       this.uploader.submitData(
         UploadDataType.FILE,
-        this.activeDocument,
+        this.activeDocumentData,
         this.trackingData
       );
     }
@@ -252,4 +299,16 @@ export type TrackingData = {
   charsAdded: number;
   linesDeleted: number;
   linesAdded: number;
+}
+
+export type DocumentData = {
+  fileName: string;
+  workspaceFolder?: string;
+  languageId: string;
+
+  repositoryName?: string;
+  branchName?: string;
+
+  lineCount: number;
+  charCount: number;
 }

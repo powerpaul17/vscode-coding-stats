@@ -1,14 +1,11 @@
 import {IncomingMessage, request} from 'http';
-import path = require('path');
-import {Memento, TextDocument, workspace} from 'vscode';
-import {TrackingData} from './EventHandler';
-import {GitHelper} from './GitHelper';
+import path from 'path';
+import {Memento} from 'vscode';
+import {DocumentData, TrackingData} from './EventHandler';
 import {Logger} from './Logger';
 import {SettingsManager} from './SettingsManager';
 
 export class Uploader {
-
-  private gitHelper: GitHelper;
 
   private uploadQueue: Array<UploadItem> = [];
 
@@ -20,9 +17,7 @@ export class Uploader {
 
   private globalState: Memento|null = null;
 
-  constructor(private settingsManager: SettingsManager) {
-    this.gitHelper = new GitHelper();
-  }
+  constructor(private settingsManager: SettingsManager) {}
 
   public subscribe(callback: StatusCallback): void {
     this.subscriptions.push(callback);
@@ -45,25 +40,24 @@ export class Uploader {
     this.publishStatus();
   }
 
-  public submitData(type: UploadDataType, document: TextDocument, trackingData: TrackingData): void {
-    const uploadItem = this.prepareUploadItem(type, document, trackingData);
+  public submitData(type: UploadDataType, documentData: DocumentData, trackingData: TrackingData): void {
+    const uploadItem = this.prepareUploadItem(type, documentData, trackingData);
     this.addItemToQueue(uploadItem);
   }
 
-  private prepareUploadItem(type: UploadDataType, document: TextDocument, trackingData: TrackingData): UploadItem {
-    const gitInfo = this.gitHelper.getGitInfo(document.fileName);
+  private prepareUploadItem(type: UploadDataType, documentData: DocumentData, trackingData: TrackingData): UploadItem {
     return {
       type: type,
 
-      fileName: workspace.asRelativePath(document.uri),
+      fileName: documentData.fileName,
 
       timestamp: trackingData.openTimestamp,
 
       readingTime: trackingData.readingTime,
       codingTime: trackingData.codingTime,
 
-      lineCount: document.lineCount,
-      charCount: document.getText().length,
+      lineCount: documentData.lineCount,
+      charCount: documentData.charCount,
 
       keystrokes: trackingData.keystrokes,
 
@@ -72,12 +66,12 @@ export class Uploader {
       linesAdded: trackingData.linesAdded,
       linesDeleted: trackingData.linesDeleted,
 
-      versionControlSystemRepository: gitInfo?.repo ?? '',
-      versionControlSystemBranch: gitInfo?.branch ?? '',
+      versionControlSystemRepository: documentData.repositoryName ?? '',
+      versionControlSystemBranch: documentData.branchName ?? '',
 
       computerId: this.settingsManager.getConfiguration().computerId,
-      workspaceFolder: this.getWorkspaceFolderOfDocument(document) ?? workspace.workspaceFolders?.[0]?.name ?? 'unknown',
-      languageId: this.getLanguageOfDocument(document)
+      workspaceFolder: documentData.workspaceFolder,
+      languageId: documentData.languageId
     };
   }
 
@@ -99,24 +93,6 @@ export class Uploader {
       noConnection: this.noConnection
     };
     this.subscriptions.forEach(callback => callback(status));
-  }
-
-  private getWorkspaceFolderOfDocument(document: TextDocument): string|void {
-    const uri = document.uri;
-    if(uri.scheme !== 'file') return;
-
-    const folder = workspace.getWorkspaceFolder(uri);
-    if(!folder) return;
-
-    return folder.uri.fsPath;
-  }
-
-  private getLanguageOfDocument(document: TextDocument): string {
-    switch(document.uri.scheme) {
-      case 'file':
-      default:
-        return document.languageId;
-    }
   }
 
   private tryUploadingNextItem(): void {
