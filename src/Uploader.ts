@@ -43,6 +43,7 @@ export class Uploader {
   public submitData(type: UploadDataType, documentData: DocumentData, trackingData: TrackingData): void {
     const uploadItem = this.prepareUploadItem(type, documentData, trackingData);
     this.addItemToQueue(uploadItem);
+    this.tryUploadingNextItem();
   }
 
   private prepareUploadItem(type: UploadDataType, documentData: DocumentData, trackingData: TrackingData): UploadItem {
