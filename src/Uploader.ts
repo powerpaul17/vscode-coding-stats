@@ -141,16 +141,17 @@ export class Uploader {
 
         this.noConnection = true;
         this.publishStatus();
-
-        this.stop();
-
-        setTimeout(() => {
-          this.noConnection = false;
-          this.start();
-        }, 10000);
       } else {
         Logger.error(err);
       }
+
+      this.stop();
+
+      setTimeout(() => {
+        this.noConnection = false;
+        this.publishStatus();
+        this.start();
+      }, 10000);
     });
 
     req.write(postData);
