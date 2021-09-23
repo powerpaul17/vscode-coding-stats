@@ -102,10 +102,12 @@ export class Uploader {
   }
 
   private uploadNextItem(): void {
+    if(!this.enabled) return;
+
     const uploadItem = this.uploadQueue.shift();
     this.saveQueue();
 
-    if(uploadItem && this.enabled) {
+    if(uploadItem) {
       this.isUploading = true;
       this.uploadItem(uploadItem);
     } else {
