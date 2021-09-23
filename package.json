@@ -104,11 +104,11 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "esbuild-base": "npx esbuild ./src/extension.ts --outfile=out/extension.js --bundle --external:vscode --platform=node",
-    "compile": "npm run compile-dev -- --minify",
-    "compile-dev": "npm run esbuild-base -- --sourcemap",
+    "esbuild-base": "node esbuild.mjs",
+    "compile": "ESBUILD_MODE=production npm run esbuild-base",
+    "compile-dev": "ESBUILD_MODE=development npm run esbuild-base",
     "lint": "eslint . --ext .ts,.tsx",
-    "watch": "npm run esbuild-base -- --sourcemap --watch"
+    "watch": "ESBUILD_MODE=development ESBUILD_WATCH=true npm run esbuild-base"
   },
   "dependencies": {
     "moment": "^2.29.1",
