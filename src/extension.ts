@@ -6,6 +6,7 @@ import {SettingsManager} from './SettingsManager';
 import {StatusBarManager} from './StatusBarManager';
 import {Uploader} from './Uploader';
 import {ReposViewProvider} from './views/ReposViewProvider';
+import {SummaryViewProvider} from './views/SummaryViewProvider';
 import {WorkspaceFoldersViewProvider} from './views/WorkspaceFoldersViewProvider';
 
 const settingsManager = new SettingsManager();
@@ -21,6 +22,11 @@ export function activate(context: ExtensionContext): void {
   const subscriptions = context.subscriptions;
 
   Logger.setOutputChannel(window.createOutputChannel('Coding Stats'));
+
+  subscriptions.push(window.registerTreeDataProvider(
+    'codingStats.summaryView',
+    new SummaryViewProvider(dataManager)
+  ));
 
   subscriptions.push(window.registerTreeDataProvider(
     'codingStats.reposView',

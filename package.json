@@ -90,6 +90,11 @@
     "views": {
       "codingStats": [
         {
+          "id": "codingStats.summaryView",
+          "name": "%views.summary.name%",
+          "type": "tree"
+        },
+        {
           "id": "codingStats.reposView",
           "name": "%views.repos.name%",
           "type": "tree"
