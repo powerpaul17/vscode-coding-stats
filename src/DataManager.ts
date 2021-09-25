@@ -64,8 +64,6 @@ export class DataManager {
 
     const byComputerId: Map<string, ComputerData> = new Map();
     const byLanguageId: Map<string, LanguageData> = new Map();
-    const byWorkspaceFolder: Map<string, WorkspaceFolderData> = new Map();
-    const byRepo: Map<string, RepoData> = new Map();
 
     for(const dataItem of data) {
       const hour = moment(dataItem.timestamp).get('hour');
@@ -75,30 +73,47 @@ export class DataManager {
       if(hourItem) this.addDataItem(hourItem, dataItem);
       this.addDataItem(sum, dataItem);
 
-      this.setMapValue(byComputerId, dataItem.computerId, hour, dataItem);
+      this.setMapValue(byComputerId, dataItem.computerId, hour, dataItem, (map) => {
+        const byWorkspaceFolderMap: Map<string, WorkspaceFolderData> = map.byWorkspaceFolder ?? new Map();
+        if(!map.byWorkspaceFolder) map.byWorkspaceFolder = byWorkspaceFolderMap;
+
+        this.setMapValue(byWorkspaceFolderMap, dataItem.workspaceFolder ?? '', hour, dataItem, (workspaceFolderMap) => {
+          this.workspaceCallback(workspaceFolderMap, hour, dataItem);
+        });
+
+        const byRepoMap: Map<string, RepoData> = map.byRepo ?? new Map();
+        if(!map.byRepo) map.byRepo = byRepoMap;
+
+        this.setMapValue(byRepoMap, dataItem.versionControlSystemRepository, hour, dataItem, (repoMap) => {
+          this.repoCallback(repoMap, hour, dataItem);
+        });
+      });
+
       this.setMapValue(byLanguageId, dataItem.languageId, hour, dataItem);
-
-      this.setMapValue(byWorkspaceFolder, dataItem.workspaceFolder, hour, dataItem, (map) => {
-        const byFileMap: Map<string, SumAndHourMap> = map.byFile ?? new Map();
-        if(!map.byFile) map.byFile = byFileMap;
-        this.setMapValue(byFileMap, dataItem.fileName, hour, dataItem);
-      });
-
-      this.setMapValue(byRepo, dataItem.versionControlSystemRepository, hour, dataItem, (map) => {
-        const byFileMap: Map<string, SumAndHourMap> = map.byFile ?? new Map();
-        if(!map.byFile) map.byFile = byFileMap;
-        this.setMapValue(byFileMap, dataItem.fileName, hour, dataItem);
-      });
     }
 
     return {
       sum,
       hourMap: hourMap,
       byComputerId,
-      byLanguageId,
-      byWorkspaceFolder,
-      byRepo
+      byLanguageId
     };
+  }
+
+  private workspaceCallback(map: WorkspaceFolderData, hour: number, dataItem: ResponseDataItem): void {
+    const byFileMap: Map<string, SumAndHourMap> = map.byFile ?? new Map();
+    if(!map.byFile) map.byFile = byFileMap;
+    this.setMapValue(byFileMap, dataItem.fileName, hour, dataItem);
+  }
+
+  private repoCallback(map: RepoData, hour: number, dataItem: ResponseDataItem): void {
+    const byBranchMap: Map<string, BranchData> = map.byBranch ?? new Map();
+    if(!map.byBranch) map.byBranch = byBranchMap;
+    this.setMapValue(byBranchMap, dataItem.versionControlSystemBranch, hour, dataItem, (branchMap) => {
+      const byFileMap: Map<string, SumAndHourMap> = branchMap.byFile ?? new Map();
+      if(!branchMap.byFile) branchMap.byFile = byFileMap;
+      this.setMapValue(byFileMap, dataItem.fileName, hour, dataItem);
+    });
   }
 
   private setMapValue<T extends SumAndHourMap>(map: Map<string, T>, key: string, hour: number, dataItem: ResponseDataItem, callback?: (map: T) => void): void {
@@ -187,24 +202,29 @@ export type Data = {
   hourMap: HourMap;
   byLanguageId: Map<string, LanguageData>;
   byComputerId: Map<string, ComputerData>;
-  byWorkspaceFolder: Map<string, WorkspaceFolderData>;
-  byRepo: Map<string, RepoData>;
 }
 
-type SumAndHourMap = {
+export type SumAndHourMap = {
   sum: DataValueRecord;
   hourMap: HourMap;
 }
 
 type LanguageData = SumAndHourMap
 
-type ComputerData = SumAndHourMap
+export type ComputerData = SumAndHourMap & {
+  byWorkspaceFolder: Map<string, WorkspaceFolderData>;
+  byRepo: Map<string, RepoData>;
+}
 
-type WorkspaceFolderData = SumAndHourMap & {
+export type WorkspaceFolderData = SumAndHourMap & {
   byFile: Map<string, SumAndHourMap>;
 }
 
-type RepoData = SumAndHourMap & {
+export type RepoData = SumAndHourMap & {
+  byBranch: Map<string, BranchData>;
+}
+
+export type BranchData = SumAndHourMap & {
   byFile: Map<string, SumAndHourMap>;
 }
 

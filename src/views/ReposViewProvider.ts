@@ -1,11 +1,11 @@
-import {EventEmitter, ThemeIcon, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri} from 'vscode';
-import moment from 'moment';
-import momentDurationFormatSetup from 'moment-duration-format';
-import {DataManager, DataValueRecord} from '../DataManager';
-import {Utils} from '../Utils';
+import {EventEmitter, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri} from 'vscode';
+import {DataManager} from '../DataManager';
+import {FileItem} from './FileItem';
+import {ComputerItem} from './ComputerItem';
+import {RepoItem} from './RepoItem';
+import {BranchItem} from './BranchItem';
 
-momentDurationFormatSetup(moment);
-export class ReposViewProvider implements TreeDataProvider<RepoItem> {
+export class ReposViewProvider implements TreeDataProvider<RepoItem|BranchItem|FileItem> {
 
   private _onDidChangeTreeData = new EventEmitter<RepoItem|void>();
 
@@ -21,54 +21,42 @@ export class ReposViewProvider implements TreeDataProvider<RepoItem> {
     return repoItem;
   }
 
-  public getChildren(repoItem?: RepoItem): Array<RepoItem> {
+  public getChildren(item?: ComputerItem|RepoItem|BranchItem): Array<ComputerItem|RepoItem|BranchItem|FileItem> {
     const data = this.dataManager.getData();
     if(!data) return [];
 
-    if(repoItem) {
-      if(repoItem instanceof RepoItem) {
-        const repoData = data.byRepo.get(repoItem.id);
-        if(!repoData) return [];
-
-        return Array.from(repoData.byFile.entries())
-          .sort(([k1, v1], [k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
+    if(item) {
+      if(item instanceof ComputerItem) {
+        return Array.from(item.computerData.byRepo.entries())
+          .sort(([_k1, v1], [_k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
           .map(([key, value]) => {
-            return {
-              id: key,
-              label: key.split('/').pop() || '(no file)',
-              description: `${Utils.getTimeString(value.sum.readingTime + value.sum.codingTime)} • ${key}`,
-              tooltip: key,
-              resourceUri: Uri.file(key)
-            };
+            return new RepoItem(key, value, { collapsibleState: TreeItemCollapsibleState.Collapsed });
+          });
+      } else if(item instanceof RepoItem) {
+        return Array.from(item.repoData.byBranch.entries())
+          .sort(([_k1, v1], [_k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
+          .map(([key, value]) => {
+            return new BranchItem(key, value, {
+              repoName: item.repoName,
+              collapsibleState: TreeItemCollapsibleState.Collapsed
+            });
+          });
+      } else if(item instanceof BranchItem) {
+        return Array.from(item.branchData.byFile.entries())
+          .sort(([_k1, v1], [_k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
+          .map(([key, value]) => {
+            return new FileItem(key, value, {
+              resourceUri: Uri.file(key),
+              idSuffix: item.branchName + '::' + item.repoName
+            });
           });
       }
       return [];
     } else {
-      return Array.from(data.byRepo.entries())
-        .sort(([k1, v1], [k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
-        .map(([key, value]) => new RepoItem({
-          id: key,
-          label: key.split('/').pop() || '(no repo)',
-          description: `${Utils.getTimeString(value.sum.readingTime + value.sum.codingTime)} • ${key}`,
-          tooltip: key,
-          collapsibleState: TreeItemCollapsibleState.Collapsed
-        }));
+      return Array.from(data.byComputerId.entries())
+        .sort(([_k1, v1], [_k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
+        .map(([key, value]) => new ComputerItem(key, value, { collapsibleState: TreeItemCollapsibleState.Collapsed }));
     }
-  }
-
-}
-
-export class RepoItem extends TreeItem {
-
-  constructor(options: { id: string, label: string, description: string, tooltip?: string, collapsibleState?: TreeItemCollapsibleState }) {
-    super(options.label);
-
-    super.id = options.id;
-
-    super.description = options.description;
-    super.tooltip = options.tooltip;
-
-    super.collapsibleState = options.collapsibleState;
   }
 
 }

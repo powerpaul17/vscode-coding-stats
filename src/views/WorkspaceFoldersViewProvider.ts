@@ -1,8 +1,10 @@
 import {EventEmitter, TreeDataProvider, TreeItem, TreeItemCollapsibleState, Uri} from 'vscode';
 import {DataManager} from '../DataManager';
-import {Utils} from '../Utils';
+import {ComputerItem} from './ComputerItem';
+import {FileItem} from './FileItem';
+import {WorkspaceFolderItem} from './WorkspaceFolderItem';
 
-export class WorkspaceFoldersViewProvider implements TreeDataProvider<WorkspaceFolderItem> {
+export class WorkspaceFoldersViewProvider implements TreeDataProvider<WorkspaceFolderItem|FileItem> {
 
   private _onDidChangeTreeData = new EventEmitter<WorkspaceFolderItem|void>();
 
@@ -18,54 +20,35 @@ export class WorkspaceFoldersViewProvider implements TreeDataProvider<WorkspaceF
     return workspaceFolderItem;
   }
 
-  public getChildren(workspaceFolderItem?: WorkspaceFolderItem): Array<WorkspaceFolderItem> {
+  public getChildren(item?: ComputerItem|WorkspaceFolderItem): Array<ComputerItem|WorkspaceFolderItem|FileItem> {
     const data = this.dataManager.getData();
     if(!data) return [];
 
-    if(workspaceFolderItem) {
-      if(workspaceFolderItem instanceof WorkspaceFolderItem) {
-        const workspaceData = data.byWorkspaceFolder.get(workspaceFolderItem.id);
-        if(!workspaceData) return [];
-
-        return Array.from(workspaceData.byFile.entries())
-          .sort(([k1, v1], [k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
+    if(item) {
+      if(item instanceof ComputerItem) {
+        return Array.from(item.computerData.byWorkspaceFolder.entries())
+          .sort(([_k1, v1], [_k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
           .map(([key, value]) => {
-            return {
-              id: key,
-              label: key.split('/').pop() || '(no file)',
-              description: `${Utils.getTimeString(value.sum.readingTime + value.sum.codingTime)} • ${key}`,
-              tooltip: key,
-              resourceUri: Uri.file(key)
-            };
+            return new WorkspaceFolderItem(key, value, {
+              collapsibleState: TreeItemCollapsibleState.Collapsed
+            });
+          });
+      } else if(item instanceof WorkspaceFolderItem) {
+        return Array.from(item.workspaceFolderData.byFile.entries())
+          .sort(([_k1, v1], [_k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
+          .map(([key, value]) => {
+            return new FileItem(key, value, {
+              resourceUri: Uri.file(key),
+              idSuffix: item.folderPath
+            });
           });
       }
       return [];
     } else {
-      return Array.from(data.byWorkspaceFolder.entries())
-        .sort(([k1, v1], [k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
-        .map(([key, value]) => new WorkspaceFolderItem({
-          id: key,
-          label: key.split('/').pop() || '(no repo)',
-          description: `${Utils.getTimeString(value.sum.readingTime + value.sum.codingTime)} • ${key}`,
-          tooltip: key,
-          collapsibleState: TreeItemCollapsibleState.Collapsed
-        }));
+      return Array.from(data.byComputerId.entries())
+        .sort(([_k1, v1], [_k2, v2]) => v2.sum.readingTime + v2.sum.codingTime - v1.sum.readingTime - v1.sum.codingTime)
+        .map(([key, value]) => new ComputerItem(key, value, { collapsibleState: TreeItemCollapsibleState.Collapsed }));
     }
-  }
-
-}
-
-export class WorkspaceFolderItem extends TreeItem {
-
-  constructor(options: { id: string, label: string, description: string, tooltip?: string, collapsibleState?: TreeItemCollapsibleState }) {
-    super(options.label);
-
-    super.id = options.id;
-
-    super.description = options.description;
-    super.tooltip = options.tooltip;
-
-    super.collapsibleState = options.collapsibleState;
   }
 
 }
