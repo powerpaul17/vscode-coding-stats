@@ -68,14 +68,9 @@
         "title": "%command.showReport%"
       },
       {
-        "command": "codingStats.startLocalServer",
+        "command": "codingStats.restartLocalServer",
         "category": "Coding Stats",
-        "title": "%command.startLocalServer%"
-      },
-      {
-        "command": "codingStats.stopLocalServer",
-        "category": "Coding Stats",
-        "title": "%command.stopLocalServer%"
+        "title": "%command.restartLocalServer%"
       }
     ],
     "viewsContainers": {
