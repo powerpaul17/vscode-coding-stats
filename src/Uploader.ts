@@ -1,11 +1,13 @@
-import {IncomingMessage, request} from 'http';
-import path from 'path';
 import {Memento} from 'vscode';
+import {IncomingMessage} from 'http';
 import {DocumentData, TrackingData} from './EventHandler';
 import {Logger} from './Logger';
+import {Method, RequestHelper} from './RequestHelper';
 import {SettingsManager} from './SettingsManager';
 
 export class Uploader {
+
+  private requestHelper: RequestHelper;
 
   private uploadQueue: Array<UploadItem> = [];
 
@@ -17,7 +19,9 @@ export class Uploader {
 
   private globalState: Memento|null = null;
 
-  constructor(private settingsManager: SettingsManager) {}
+  constructor(private settingsManager: SettingsManager) {
+    this.requestHelper = new RequestHelper(settingsManager);
+  }
 
   public subscribe(callback: StatusCallback): void {
     this.subscriptions.push(callback);
@@ -116,35 +120,25 @@ export class Uploader {
     this.publishStatus();
   }
 
-  private uploadItem(uploadItem: UploadItem): void {
-    const uploadUrl = path.join(this.settingsManager.getCompleteServerUrl(), 'api/v1/upload');
-
+  private async uploadItem(uploadItem: UploadItem): Promise<void> {
     const postData = JSON.stringify(uploadItem);
 
-    const req = request(
-      uploadUrl,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(postData)
-        }
-      }
-    );
-
-    req.on('response', this.onUploadResponse.bind(this));
-    req.on('error', (err) => {
+    try {
+      await this.requestHelper.makeRequest('api/v1/upload', Method.POST, postData);
+      this.isUploading = false;
+      this.uploadNextItem();
+    } catch(error) {
       this.addItemToQueue(uploadItem, true);
 
       this.isUploading = false;
 
-      if(err.code === 'ECONNREFUSED') {
-        Logger.warn(err);
+      if(error.code === 'ECONNREFUSED') {
+        Logger.warn(error);
 
         this.noConnection = true;
         this.publishStatus();
       } else {
-        Logger.error(err);
+        Logger.error(error);
       }
 
       this.stop();
@@ -154,21 +148,7 @@ export class Uploader {
         this.publishStatus();
         this.start();
       }, 10000);
-    });
-
-    req.write(postData);
-    req.end();
-  }
-
-  private onUploadResponse(response: IncomingMessage): void {
-    response.on('data', (data) => {
-      Logger.debug('data', data);
-    });
-    response.on('end', () => {
-      Logger.debug('end', response);
-      this.isUploading = false;
-      this.uploadNextItem();
-    });
+    }
   }
 
   private async saveQueue(): Promise<void> {

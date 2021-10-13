@@ -1,15 +1,17 @@
-import {get, IncomingMessage} from 'http';
 import moment, {MomentInput} from 'moment';
-import {Logger} from './Logger';
+import {RequestHelper} from './RequestHelper';
 import {SettingsManager} from './SettingsManager';
 
 export class DataManager {
+
+  private requestHelper: RequestHelper;
 
   private subscriptions: Array<Callback> = [];
 
   private data: Data|null = null;
 
-  constructor(private settingsManager: SettingsManager) {
+  constructor(settingsManager: SettingsManager) {
+    this.requestHelper = new RequestHelper(settingsManager);
     setInterval(() => {
       void this.updateData();
     }, 10000);
@@ -33,29 +35,17 @@ export class DataManager {
     this.publish();
   }
 
-  private async getDataForDayRange(from: MomentInput, to?: MomentInput): Promise<Data> {
+  private async getDataForDayRange(from: MomentInput, to?: MomentInput): Promise<Data|null> {
     if(!to) to = from;
 
-    const serverUrl = this.settingsManager.getConfiguration().serverUrl;
+    try {
+      const data = await this.requestHelper.makeRequest<ResponseData>(`api/v1/data?from=${from}&to=${to}`);
+      return this.analyzeReponseData(data);
+    } catch(error) {
+      // TODO
+    }
 
-    const req = get(`${serverUrl}/api/v1/data?from=${from}&to=${to}`);
-
-    req.on('error', Logger.error.bind(this));
-
-    return new Promise((res, rej) => {
-      req.on('response', (response: IncomingMessage) => {
-        let receivedData = '';
-        response.on('data', (data) => {
-          // Logger.warn('DataManager received data:', data);
-          receivedData += data;
-        });
-        response.on('end', () => {
-          const jsonData = JSON.parse(receivedData);
-
-          if(jsonData.success) res(this.analyzeReponseData(jsonData.data));
-        });
-      });
-    });
+    return null;
   }
 
   private analyzeReponseData(data: ResponseData): Data {
