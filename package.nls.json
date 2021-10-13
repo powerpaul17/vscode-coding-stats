@@ -3,6 +3,8 @@
   "configuration.serverUrl.description": "The URL of the backend server if the local server is not used.",
   "configuration.port.title": "Port of local server",
   "configuration.port.description": "The port of the local server.",
+  "configuration.username.title": "Username",
+  "configuration.password.title": "Password",
   "configuration.computerId.title": "Computer ID",
   "configuration.computerId.description": "The ID of the current VS Code instance.",
   "configuration.localServerMode.title": "Local Server enabled?",

@@ -5,6 +5,8 @@ export class SettingsManager {
   private configuration: Configuration = {
     port: 10333,
     serverUrl: 'http://localhost',
+    username: '',
+    password: '',
     debugLogging: false,
     showStatus: true,
     localServerMode: true,
@@ -39,6 +41,8 @@ export class SettingsManager {
     this.configuration = {
       port: configuration.get('port') ?? 10333,
       serverUrl: configuration.get('serverUrl') ?? 'http://localhost',
+      username: configuration.get('username') ?? '',
+      password: configuration.get('password') ?? '',
       debugLogging: configuration.get('debugLogging') ?? false,
       showStatus: configuration.get('showStatus') ?? true,
       localServerMode: configuration.get('localServerMode') ?? true,
@@ -62,6 +66,8 @@ export type Configuration = {
   computerId: string;
   port: number;
   serverUrl: string;
+  username: string;
+  password: string;
 }
 
 type Callback = (configuration: Configuration) => void;

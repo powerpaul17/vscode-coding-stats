@@ -29,6 +29,14 @@
           "title": "%configuration.port.title%",
           "description": "%configuration.port.description%"
         },
+        "codingStats.username": {
+          "type": "string",
+          "title": "%configuration.username.title%"
+        },
+        "codingStats.password": {
+          "type": "string",
+          "title": "%configuration.password.title%"
+        },
         "codingStats.computerId": {
           "type": "string",
           "default": "",
