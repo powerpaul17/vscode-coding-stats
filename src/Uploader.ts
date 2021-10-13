@@ -1,5 +1,5 @@
-import {Memento} from 'vscode';
 import {IncomingMessage} from 'http';
+import {env, Memento} from 'vscode';
 import {DocumentData, TrackingData} from './EventHandler';
 import {Logger} from './Logger';
 import {Method, RequestHelper} from './RequestHelper';
@@ -74,8 +74,8 @@ export class Uploader {
       versionControlSystemRepository: documentData.repositoryName ?? '',
       versionControlSystemBranch: documentData.branchName ?? '',
 
-      computerId: this.settingsManager.getConfiguration().computerId,
-      workspaceFolder: documentData.workspaceFolder,
+      computerId: env.machineId,
+      workspaceFolder: documentData.workspaceFolder ?? '',
       languageId: documentData.languageId
     };
   }
