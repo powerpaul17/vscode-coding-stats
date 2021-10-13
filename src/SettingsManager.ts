@@ -23,6 +23,7 @@ export class SettingsManager {
 
   public subscribe(callback: Callback): void {
     this.subscriptions.push(callback);
+    callback(this.configuration);
   }
 
   public getConfiguration(): Configuration {

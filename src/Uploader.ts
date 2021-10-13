@@ -25,6 +25,7 @@ export class Uploader {
 
   public subscribe(callback: StatusCallback): void {
     this.subscriptions.push(callback);
+    callback(this.getUploaderStatus());
   }
 
   public init(globalState: Memento): void {
@@ -91,13 +92,16 @@ export class Uploader {
   }
 
   private publishStatus(): void {
-    const status: UploaderStatus = {
+    this.subscriptions.forEach(callback => callback(this.getUploaderStatus()));
+  }
+
+  private getUploaderStatus(): UploaderStatus {
+    return {
       enabled: this.enabled,
       pendingItems: this.uploadQueue.length,
       isUploading: this.isUploading,
       noConnection: this.noConnection
     };
-    this.subscriptions.forEach(callback => callback(status));
   }
 
   private tryUploadingNextItem(): void {

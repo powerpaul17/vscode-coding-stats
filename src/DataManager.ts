@@ -20,6 +20,7 @@ export class DataManager {
 
   public subscribe(callback: Callback): void {
     this.subscriptions.push(callback);
+    callback(this.data);
   }
 
   public getData(): Data|null {
