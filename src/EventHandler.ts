@@ -50,7 +50,6 @@ export class EventHandler {
   };
 
   private activeDocument: TextDocument|null = null;
-  private activeDocumentData: DocumentData|null = null
 
   private gitHelper: GitHelper;
 
@@ -96,18 +95,17 @@ export class EventHandler {
     this.resetTrackingData();
 
     this.activeDocument = newDocument;
-    this.updateActiveDocumentData(newDocument);
 
     this.trackingData.openTimestamp = now;
     this.trackingData.lastReadingTimestamp = now;
   }
 
-  private updateActiveDocumentData(document: TextDocument|null): void {
+  private getActiveDocumentData(document: TextDocument|null): DocumentData|null {
     if(!document) {
-      this.activeDocumentData = null;
+      return null;
     } else {
       const gitInfo = this.gitHelper.getGitInfo(document.fileName);
-      this.activeDocumentData = {
+      return {
         fileName: workspace.asRelativePath(document.uri),
         workspaceFolder: this.getWorkspaceFolderOfDocument(document) ?? undefined,
         languageId: this.getLanguageOfDocument(document),
@@ -245,15 +243,12 @@ export class EventHandler {
   }
 
   private uploadTrackingData(): void {
-    if(this.activeDocumentData && this.shouldUploadDocument()) {
-      if(this.activeDocument) {
-        this.activeDocumentData.lineCount = this.activeDocument.lineCount;
-        this.activeDocumentData.charCount = this.activeDocument.getText().length;
-      }
+    const activeDocumentData = this.getActiveDocumentData(this.activeDocument);
 
+    if(activeDocumentData && this.shouldUploadDocument()) {
       this.uploader.submitData(
         UploadDataType.FILE,
-        this.activeDocumentData,
+        activeDocumentData,
         this.trackingData
       );
     }
