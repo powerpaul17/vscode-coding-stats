@@ -1,4 +1,4 @@
-import {IncomingMessage, request} from 'http';
+import {request} from 'https';
 import path from 'path';
 import {Logger} from './Logger';
 import {SettingsManager} from './SettingsManager';
@@ -34,7 +34,7 @@ export class RequestHelper {
         rej(err);
       });
 
-      req.on('response', (response: IncomingMessage) => {
+      req.on('response', (response) => {
         let receivedData = '';
         response.on('data', (data) => {
           // Logger.warn('DataManager received data:', data);
