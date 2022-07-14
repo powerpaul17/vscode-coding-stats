@@ -18,7 +18,7 @@ export class RequestHelper {
       url,
       {
         method: method,
-        auth: `${username}: ${password}`,
+        auth: `${username}:${password}`,
         headers: {
           ...postData ? {
             'Content-Type': 'application/json',
