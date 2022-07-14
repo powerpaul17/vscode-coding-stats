@@ -23,12 +23,6 @@
           "title": "%configuration.serverUrl.title%",
           "description": "%configuration.serverUrl.description%"
         },
-        "codingStats.port": {
-          "type": "number",
-          "default": 10333,
-          "title": "%configuration.port.title%",
-          "description": "%configuration.port.description%"
-        },
         "codingStats.username": {
           "type": "string",
           "title": "%configuration.username.title%"
@@ -42,18 +36,6 @@
           "default": "",
           "title": "%configuration.computerId.title%",
           "description": "%configuration.computerId.description%"
-        },
-        "codingStats.localServerMode": {
-          "type": "boolean",
-          "default": true,
-          "title": "%configuration.localServerMode.title%",
-          "description": "%configuration.localServerMode.description%"
-        },
-        "codingStats.localServerDataDirectory": {
-          "type": "string",
-          "default": "",
-          "title": "%configuration.localServerDataDirectory.title%",
-          "description": "%configuration.localServerDataDirectory.description%"
         },
         "codingStats.showStatus": {
           "type": "boolean",
@@ -74,11 +56,6 @@
         "command": "codingStats.showReport",
         "category": "Coding Stats",
         "title": "%command.showReport%"
-      },
-      {
-        "command": "codingStats.restartLocalServer",
-        "category": "Coding Stats",
-        "title": "%command.restartLocalServer%"
       }
     ],
     "viewsContainers": {

@@ -1,7 +1,6 @@
-import {ExtensionContext, commands, window} from 'vscode';
+import {ExtensionContext, window} from 'vscode';
 import {DataManager} from './DataManager';
 import {EventHandler} from './EventHandler';
-import {LocalServer} from './LocalServer';
 import {Logger} from './Logger';
 import {SettingsManager} from './SettingsManager';
 import {StatusBarManager} from './StatusBarManager';
@@ -16,7 +15,6 @@ const dataManager = new DataManager(settingsManager);
 
 const uploader = new Uploader(settingsManager);
 const eventHandler = new EventHandler(uploader);
-const localServer = new LocalServer(settingsManager);
 
 const statusBarManager = new StatusBarManager(settingsManager, uploader, dataManager);
 
@@ -40,15 +38,10 @@ export function activate(context: ExtensionContext): void {
     new WorkspaceFoldersViewProvider(dataManager)
   ));
 
-  subscriptions.push(commands.registerCommand('codingStats.restartLocalServer', () => {
-    localServer.restart();
-  }));
-
   uploader.init(context.globalState);
   uploader.start();
 }
 
 export function deactivate(): void {
   eventHandler.dispose();
-  localServer.dispose();
 }

@@ -3,14 +3,11 @@ import {env, workspace} from 'vscode';
 export class SettingsManager {
 
   private configuration: Configuration = {
-    port: 10333,
     serverUrl: 'http://localhost',
     username: '',
     password: '',
     debugLogging: false,
     showStatus: true,
-    localServerMode: true,
-    localServerDataDirectory: `${process.env.USERPROFILE || process.env.HOME}/.coding-stats/`,
     computerId: env.machineId
   }
 
@@ -31,23 +28,17 @@ export class SettingsManager {
   }
 
   public getCompleteServerUrl(): string {
-    if(this.configuration.localServerMode) {
-      return `http://localhost:${this.configuration.port}`;
-    }
     return this.configuration.serverUrl;
   }
 
   private onConfigurationChanged(): void {
     const configuration = workspace.getConfiguration('codingStats');
     this.configuration = {
-      port: configuration.get('port') ?? 10333,
       serverUrl: configuration.get('serverUrl') ?? 'http://localhost',
       username: configuration.get('username') ?? '',
       password: configuration.get('password') ?? '',
       debugLogging: configuration.get('debugLogging') ?? false,
       showStatus: configuration.get('showStatus') ?? true,
-      localServerMode: configuration.get('localServerMode') ?? true,
-      localServerDataDirectory: configuration.get('localServerDataDirectory') ?? `${process.env.USERPROFILE || process.env.HOME}/.coding-stats/`,
       computerId: configuration.get('computerId') ?? env.machineId
     };
     this.publish();
@@ -62,10 +53,7 @@ export class SettingsManager {
 export type Configuration = {
   debugLogging: boolean;
   showStatus: boolean;
-  localServerMode: boolean;
-  localServerDataDirectory: string;
   computerId: string;
-  port: number;
   serverUrl: string;
   username: string;
   password: string;
