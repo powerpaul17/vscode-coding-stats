@@ -19,7 +19,6 @@
       "properties": {
         "codingStats.serverUrl": {
           "type": "string",
-          "default": "http://127.0.0.1:10333",
           "title": "%configuration.serverUrl.title%",
           "description": "%configuration.serverUrl.description%"
         },
