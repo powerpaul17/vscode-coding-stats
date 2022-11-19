@@ -1,7 +1,7 @@
 {
   "name": "vscode-coding-stats",
   "displayName": "Coding Stats",
-  "version": "0.0.1-dev",
+  "version": "0.0.2",
   "publisher": "paultirk",
   "engines": {
     "vscode": "^1.59.0"
