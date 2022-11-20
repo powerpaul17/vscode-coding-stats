@@ -54,6 +54,8 @@ export class EventHandler {
   private gitHelper: GitHelper;
 
   constructor(private uploader: Uploader) {
+    this.gitHelper = new GitHelper();
+
     this.onActiveFileChange(window.activeTextEditor);
 
     const subscriptions = [];
