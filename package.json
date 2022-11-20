@@ -94,7 +94,7 @@
     "compile-dev": "ESBUILD_MODE=development npm run esbuild-base",
     "lint": "eslint . --ext .ts,.tsx",
     "watch": "ESBUILD_MODE=development ESBUILD_WATCH=true npm run esbuild-base",
-    "publish": "dotenv -- vsce publish --allow-star-activation"
+    "publish": "dotenv -- vsce publish --message \"Release %s\" --allow-star-activation"
   },
   "dependencies": {
     "moment": "^2.29.1",
