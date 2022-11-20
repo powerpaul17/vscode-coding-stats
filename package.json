@@ -6,6 +6,7 @@
   "engines": {
     "vscode": "^1.59.0"
   },
+  "repository": "https://github.com/powerpaul17/vscode-coding-stats.git",
   "main": "./out/extension.js",
   "activationEvents": [
     "*"
