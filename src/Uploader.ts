@@ -1,4 +1,3 @@
-import {IncomingMessage} from 'http';
 import {env, Memento} from 'vscode';
 import {DocumentData, TrackingData} from './EventHandler';
 import {Logger} from './Logger';
