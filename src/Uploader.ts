@@ -2,12 +2,12 @@ import {IncomingMessage} from 'http';
 import {env, Memento} from 'vscode';
 import {DocumentData, TrackingData} from './EventHandler';
 import {Logger} from './Logger';
-import {Method, RequestHelper} from './RequestHelper';
 import {SettingsManager} from './SettingsManager';
+import {ApiHelper} from './ApiHelper';
 
 export class Uploader {
 
-  private requestHelper: RequestHelper;
+  private apiHelper: ApiHelper;
 
   private uploadQueue: Array<UploadItem> = [];
 
@@ -19,8 +19,8 @@ export class Uploader {
 
   private globalState: Memento|null = null;
 
-  constructor(private settingsManager: SettingsManager) {
-    this.requestHelper = new RequestHelper(settingsManager);
+  constructor(settingsManager: SettingsManager) {
+    this.apiHelper = new ApiHelper(settingsManager);
   }
 
   public subscribe(callback: StatusCallback): void {
@@ -128,7 +128,7 @@ export class Uploader {
     const postData = JSON.stringify(uploadItem);
 
     try {
-      await this.requestHelper.makeRequest('api/v1/upload', Method.POST, postData);
+      await this.apiHelper.uploadRecord(postData);
       this.isUploading = false;
       this.uploadNextItem();
     } catch(error) {

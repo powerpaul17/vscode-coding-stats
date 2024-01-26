@@ -1,17 +1,18 @@
 import moment, {MomentInput} from 'moment';
-import {RequestHelper} from './RequestHelper';
+
 import {SettingsManager} from './SettingsManager';
+import {ApiHelper} from './ApiHelper';
 
 export class DataManager {
 
-  private requestHelper: RequestHelper;
+  private apiHelper: ApiHelper;
 
   private subscriptions: Array<Callback> = [];
 
   private data: Data|null = null;
 
   constructor(settingsManager: SettingsManager) {
-    this.requestHelper = new RequestHelper(settingsManager);
+    this.apiHelper = new ApiHelper(settingsManager);
     setInterval(() => {
       void this.updateData();
     }, 10000);
@@ -40,7 +41,7 @@ export class DataManager {
     if(!to) to = from;
 
     try {
-      const data = await this.requestHelper.makeRequest<ResponseData>(`api/v1/data?from=${from}&to=${to}`);
+      const data = await this.apiHelper.getData(from, to);
       return this.analyzeReponseData(data);
     } catch(error) {
       // TODO
@@ -246,7 +247,7 @@ type HourMap = [
   DataValueRecord
 ];
 
-type ResponseData = Array<ResponseDataItem>;
+export type ResponseData = Array<ResponseDataItem>;
 
 // TODO: move into common place
 type ResponseDataItem = {

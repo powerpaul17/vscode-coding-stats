@@ -1,5 +1,6 @@
 import {request} from 'https';
 import path from 'path';
+
 import {Logger} from './Logger';
 import {SettingsManager} from './SettingsManager';
 
@@ -7,22 +8,29 @@ export class RequestHelper {
 
   constructor(private settingsManager: SettingsManager) {}
 
-  public makeRequest<T>(endpoint: string, method: Method = Method.GET, postData?: any): Promise<T> {
+  public async makeRequest<T>({
+    endpoint,
+    method = Method.GET,
+    postData,
+    authorizationToken
+  }: {
+    endpoint: string;
+    method?: Method;
+    postData?: any;
+    authorizationToken?: string;
+  }): Promise<T> {
     const serverUrl = this.settingsManager.getCompleteServerUrl();
     const url = path.join(serverUrl, endpoint);
-
-    const username = this.settingsManager.getConfiguration().username;
-    const password = this.settingsManager.getConfiguration().password;
 
     const req = request(
       url,
       {
         method: method,
-        auth: `${username}:${password}`,
         headers: {
           ...postData ? {
             'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(postData)
+            'Content-Length': Buffer.byteLength(postData),
+            ...authorizationToken ? { 'Authorization': authorizationToken } : {}
           } : {}
         }
       }
@@ -41,12 +49,13 @@ export class RequestHelper {
           receivedData += data;
         });
         response.on('end', () => {
-          const jsonData = JSON.parse(receivedData);
-          if(jsonData.success) {
-            res(jsonData.data);
-          } else {
-            rej();
+          try {
+            const jsonData = JSON.parse(receivedData);
+            res(jsonData);
+          } catch(e) {
+            rej(e);
           }
+
         });
       });
 
