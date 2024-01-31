@@ -30,8 +30,8 @@ export class RequestHelper {
           ...postData ? {
             'Content-Type': 'application/json',
             'Content-Length': Buffer.byteLength(postData),
-            ...authorizationToken ? { 'Authorization': authorizationToken } : {}
-          } : {}
+          } : {},
+          ...authorizationToken ? { 'Authorization': authorizationToken } : {}
         }
       }
     );
