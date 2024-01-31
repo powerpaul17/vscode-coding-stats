@@ -31,7 +31,8 @@ export class RequestHelper {
             'Content-Type': 'application/json',
             'Content-Length': Buffer.byteLength(postData),
           } : {},
-          ...authorizationToken ? { 'Authorization': authorizationToken } : {}
+          ...authorizationToken ? { 'Authorization': authorizationToken } : {},
+          'User-Agent': 'CodingStatsExtension/1.0'
         }
       }
     );
