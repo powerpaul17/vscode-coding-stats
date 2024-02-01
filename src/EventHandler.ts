@@ -1,10 +1,20 @@
-import {Disposable, TextDocument, TextDocumentChangeEvent, TextDocumentContentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, TextEditorVisibleRangesChangeEvent, window, WindowState, workspace} from 'vscode';
-import {GitHelper} from './GitHelper';
-import {Logger} from './Logger';
-import {UploadDataType, Uploader} from './Uploader';
+import {
+  Disposable,
+  TextDocument,
+  TextDocumentChangeEvent,
+  TextDocumentContentChangeEvent,
+  TextEditor,
+  TextEditorSelectionChangeEvent,
+  TextEditorVisibleRangesChangeEvent,
+  window,
+  WindowState,
+  workspace
+} from 'vscode';
+import { GitHelper } from './GitHelper';
+import { Logger } from './Logger';
+import { UploadDataType, Uploader } from './Uploader';
 
 export class EventHandler {
-
   private static MAXIMUM_RECORD_LENGTH = 60 * 1000;
 
   private static MINIMUM_READING_TIME = 5 * 1000;
@@ -49,7 +59,7 @@ export class EventHandler {
     linesAdded: 0
   };
 
-  private activeDocument: TextDocument|null = null;
+  private activeDocument: TextDocument | null = null;
 
   private gitHelper: GitHelper;
 
@@ -60,12 +70,26 @@ export class EventHandler {
 
     const subscriptions = [];
 
-    subscriptions.push(window.onDidChangeActiveTextEditor(this.onActiveFileChange.bind(this)));
-    subscriptions.push(window.onDidChangeTextEditorSelection(this.onEditorSelectionChange.bind(this)));
-    subscriptions.push(window.onDidChangeTextEditorVisibleRanges(this.onEditorVisibleRangesChange.bind(this)));
-    subscriptions.push(window.onDidChangeWindowState(this.onWindowStateChange.bind(this)));
+    subscriptions.push(
+      window.onDidChangeActiveTextEditor(this.onActiveFileChange.bind(this))
+    );
+    subscriptions.push(
+      window.onDidChangeTextEditorSelection(
+        this.onEditorSelectionChange.bind(this)
+      )
+    );
+    subscriptions.push(
+      window.onDidChangeTextEditorVisibleRanges(
+        this.onEditorVisibleRangesChange.bind(this)
+      )
+    );
+    subscriptions.push(
+      window.onDidChangeWindowState(this.onWindowStateChange.bind(this))
+    );
 
-    subscriptions.push(workspace.onDidChangeTextDocument(this.onFileChange.bind(this)));
+    subscriptions.push(
+      workspace.onDidChangeTextDocument(this.onFileChange.bind(this))
+    );
 
     this.disposable = Disposable.from(...subscriptions);
 
@@ -80,7 +104,7 @@ export class EventHandler {
   private onActiveFileChange(textEditor?: TextEditor): void {
     const now = Date.now();
 
-    if(textEditor?.document === this.activeDocument) return;
+    if (textEditor?.document === this.activeDocument) return;
 
     this.changeActiveFile(now, textEditor?.document);
   }
@@ -88,9 +112,13 @@ export class EventHandler {
   private changeActiveFile(now: number, document?: TextDocument): void {
     const newDocument = document ?? null;
 
-    if(newDocument === this.activeDocument) return;
+    if (newDocument === this.activeDocument) return;
 
-    if(this.activeDocument && (this.trackingData.codingTime || this.trackingData.readingTime >= EventHandler.MINIMUM_READING_TIME)) {
+    if (
+      this.activeDocument &&
+      (this.trackingData.codingTime ||
+        this.trackingData.readingTime >= EventHandler.MINIMUM_READING_TIME)
+    ) {
       this.uploadTrackingData();
     }
 
@@ -102,14 +130,17 @@ export class EventHandler {
     this.trackingData.lastReadingTimestamp = now;
   }
 
-  private getActiveDocumentData(document: TextDocument|null): DocumentData|null {
-    if(!document) {
+  private getActiveDocumentData(
+    document: TextDocument | null
+  ): DocumentData | null {
+    if (!document) {
       return null;
     } else {
       const gitInfo = this.gitHelper.getGitInfo(document.fileName);
       return {
         fileName: workspace.asRelativePath(document.uri),
-        workspaceFolder: this.getWorkspaceFolderOfDocument(document) ?? undefined,
+        workspaceFolder:
+          this.getWorkspaceFolderOfDocument(document) ?? undefined,
         languageId: this.getLanguageOfDocument(document),
         lineCount: document.lineCount,
         charCount: document.getText().length,
@@ -119,18 +150,18 @@ export class EventHandler {
     }
   }
 
-  private getWorkspaceFolderOfDocument(document: TextDocument): string|void {
+  private getWorkspaceFolderOfDocument(document: TextDocument): string | void {
     const uri = document.uri;
-    if(uri.scheme !== 'file') return;
+    if (uri.scheme !== 'file') return;
 
     const folder = workspace.getWorkspaceFolder(uri);
-    if(!folder) return;
+    if (!folder) return;
 
     return folder.uri.fsPath;
   }
 
   private getLanguageOfDocument(document: TextDocument): string {
-    switch(document.uri.scheme) {
+    switch (document.uri.scheme) {
       case 'file':
       default:
         return document.languageId;
@@ -140,17 +171,19 @@ export class EventHandler {
   private onEditorSelectionChange(event: TextEditorSelectionChangeEvent): void {
     const now = Date.now();
 
-    if(event.textEditor.document !== this.activeDocument) {
+    if (event.textEditor.document !== this.activeDocument) {
       this.changeActiveFile(now, event.textEditor.document);
     } else {
       this.updateReadingTime(now);
     }
   }
 
-  private onEditorVisibleRangesChange(event: TextEditorVisibleRangesChangeEvent): void {
+  private onEditorVisibleRangesChange(
+    event: TextEditorVisibleRangesChangeEvent
+  ): void {
     const now = Date.now();
 
-    if(event.textEditor.document !== this.activeDocument) {
+    if (event.textEditor.document !== this.activeDocument) {
       this.changeActiveFile(now, event.textEditor.document);
     } else {
       this.updateReadingTime(now);
@@ -158,14 +191,18 @@ export class EventHandler {
   }
 
   private onWindowStateChange(windowState: WindowState): void {
-    if(this.activeDocument && !windowState.focused) {
-    //   this.updateReadingTime();
+    if (this.activeDocument && !windowState.focused) {
+      //   this.updateReadingTime();
     }
   }
 
   private updateReadingTime(now: number): void {
-    if(this.trackingData.lastReadingTimestamp + EventHandler.READING_TIMEOUT >= now) {
-      this.trackingData.readingTime += now - this.trackingData.lastReadingTimestamp;
+    if (
+      this.trackingData.lastReadingTimestamp + EventHandler.READING_TIMEOUT >=
+      now
+    ) {
+      this.trackingData.readingTime +=
+        now - this.trackingData.lastReadingTimestamp;
     } else {
       this.trackingData.readingTime += EventHandler.READING_TIMEOUT;
     }
@@ -181,22 +218,34 @@ export class EventHandler {
     // Then Event `onDidChangeTextDocument` be emitted even if you has not edited anything in setting document.
     // I ignore empty activeDocument to keeping tracker up and avoiding exception like follow:
     //    TypeError: Cannot set property 'lineCount' of null  // activeDocument.lineCount = ...
-    if(!this.activeDocument) return;
+    if (!this.activeDocument) return;
 
-    if(EventHandler.INVALID_CODING_DOCUMENT_SCHEMES.indexOf(event.document.uri.scheme) >= 0 ) return;
+    if (
+      EventHandler.INVALID_CODING_DOCUMENT_SCHEMES.indexOf(
+        event.document.uri.scheme
+      ) >= 0
+    )
+      return;
 
     this.analyzeDocumentContentChanges(event.contentChanges.slice());
 
-    Logger.debug('active document: lineCount:', this.activeDocument.lineCount, '; length:', this.activeDocument.getText().length);
+    Logger.debug(
+      'active document: lineCount:',
+      this.activeDocument.lineCount,
+      '; length:',
+      this.activeDocument.getText().length
+    );
     // this.activeDocument.lineCount = event.document.lineCount;
 
     this.updateCodingTime();
   }
 
-  private analyzeDocumentContentChanges(contentChanges: Array<TextDocumentContentChangeEvent>): void {
-    if(contentChanges.length) this.trackingData.keystrokes++;
+  private analyzeDocumentContentChanges(
+    contentChanges: Array<TextDocumentContentChangeEvent>
+  ): void {
+    if (contentChanges.length) this.trackingData.keystrokes++;
 
-    for(const change of contentChanges) {
+    for (const change of contentChanges) {
       const linesDeleted = change.range.end.line - change.range.start.line;
       this.trackingData.linesDeleted += linesDeleted;
 
@@ -212,11 +261,15 @@ export class EventHandler {
 
     Logger.debug(
       'tracking data: chars:',
-      '+', this.trackingData.charsAdded,
-      '-', this.trackingData.charsDeleted,
+      '+',
+      this.trackingData.charsAdded,
+      '-',
+      this.trackingData.charsDeleted,
       '; lines:',
-      '+', this.trackingData.linesAdded,
-      '-', this.trackingData.linesDeleted,
+      '+',
+      this.trackingData.linesAdded,
+      '-',
+      this.trackingData.linesDeleted,
       '; keystrokes:',
       this.trackingData.keystrokes
     );
@@ -225,8 +278,12 @@ export class EventHandler {
   private updateCodingTime(): void {
     const now = Date.now();
 
-    if(this.trackingData.lastCodingTimestamp + EventHandler.CODING_TIMEOUT >= now) {
-      this.trackingData.codingTime += now - this.trackingData.lastCodingTimestamp;
+    if (
+      this.trackingData.lastCodingTimestamp + EventHandler.CODING_TIMEOUT >=
+      now
+    ) {
+      this.trackingData.codingTime +=
+        now - this.trackingData.lastCodingTimestamp;
     }
 
     this.uploadTrackingDataIfNecessary(now);
@@ -238,7 +295,12 @@ export class EventHandler {
   }
 
   private uploadTrackingDataIfNecessary(now: number): void {
-    if(this.trackingData.openTimestamp + EventHandler.MAXIMUM_RECORD_LENGTH <= now && (this.trackingData.codingTime || this.trackingData.readingTime >= EventHandler.MINIMUM_READING_TIME)) {
+    if (
+      this.trackingData.openTimestamp + EventHandler.MAXIMUM_RECORD_LENGTH <=
+        now &&
+      (this.trackingData.codingTime ||
+        this.trackingData.readingTime >= EventHandler.MINIMUM_READING_TIME)
+    ) {
       this.uploadTrackingData();
       this.trackingData.openTimestamp = now;
     }
@@ -247,7 +309,7 @@ export class EventHandler {
   private uploadTrackingData(): void {
     const activeDocumentData = this.getActiveDocumentData(this.activeDocument);
 
-    if(activeDocumentData && this.shouldUploadDocument()) {
+    if (activeDocumentData && this.shouldUploadDocument()) {
       this.uploader.submitData(
         UploadDataType.FILE,
         activeDocumentData,
@@ -276,9 +338,10 @@ export class EventHandler {
 
   private shouldUploadDocument(): boolean {
     Logger.debug('isIgnoreDocument:', this.activeDocument);
-    return !!this.activeDocument && this.activeDocument.uri.scheme !== 'inmemory';
+    return (
+      !!this.activeDocument && this.activeDocument.uri.scheme !== 'inmemory'
+    );
   }
-
 }
 
 export type TrackingData = {
@@ -296,7 +359,7 @@ export type TrackingData = {
   charsAdded: number;
   linesDeleted: number;
   linesAdded: number;
-}
+};
 
 export type DocumentData = {
   fileName: string;
@@ -308,4 +371,4 @@ export type DocumentData = {
 
   lineCount: number;
   charCount: number;
-}
+};
