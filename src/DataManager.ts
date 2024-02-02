@@ -142,35 +142,7 @@ export class DataManager {
   }
 
   private getEmptyHourArray(): HourMap {
-    const emptyItem = this.getEmptyItem();
-
-    const array: HourMap = [
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem,
-      emptyItem
-    ];
-    return array;
+    return Array(24).fill(undefined).map(() => this.getEmptyItem());
   }
 
   private getEmptyItem(): DataValueRecord {
