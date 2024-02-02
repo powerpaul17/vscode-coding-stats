@@ -363,10 +363,19 @@ export class EventHandler {
 
   private uploadTrackingData(): void {
     const now = Date.now();
+
     if (this.trackingData.lastCodingTimestamp) {
-      this.updateCodingTimeWithDifference(now);
+      if (!this.codingTimeoutReached(now)) {
+        this.updateCodingTimeWithDifference(now);
+      } else {
+        this.trackingData.codingTime += EventHandler.CODING_TIMEOUT;
+      }
     } else if (this.trackingData.lastReadingTimestamp) {
-      this.updateReadingTimeWithDifference(now);
+      if (!this.readingTimeoutReached(now)) {
+        this.updateReadingTimeWithDifference(now);
+      } else {
+        this.trackingData.readingTime += EventHandler.READING_TIMEOUT;
+      }
     }
 
     const activeDocumentData = this.getActiveDocumentData(this.activeDocument);
