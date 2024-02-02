@@ -26,15 +26,20 @@ export class EventHandler {
     // there are will be a `onDidChangeTextDocument` with document scheme `git-index`
     // emitted when you switch document, so ignore it
     'git-index',
+
     // since 1.9.0 vscode changed `git-index` to `git`, OK, they are refactoring around source control
     // see more: https://code.visualstudio.com/updates/v1_9#_contributable-scm-providers
     'git',
+
     // when you just look up output channel content, there will be a `onDidChangeTextDocument`
     'output',
+
     // This is an edit event emit from you debug console input box
     'input',
+
     // This scheme appears in vscode global replace diff preview editor
     'private',
+
     // This scheme is used for markdown preview document
     // It will appear when you edit a markdown with aside preview
     'markdown'
@@ -233,9 +238,9 @@ export class EventHandler {
     if (!this.activeDocument) return;
 
     if (
-      EventHandler.INVALID_CODING_DOCUMENT_SCHEMES.indexOf(
+      EventHandler.INVALID_CODING_DOCUMENT_SCHEMES.includes(
         event.document.uri.scheme
-      ) >= 0
+      )
     )
       return;
 
@@ -384,10 +389,12 @@ export class EventHandler {
   }
 
   private shouldUploadDocument(): boolean {
-    Logger.debug('isIgnoreDocument:', this.activeDocument);
-    return (
-      !!this.activeDocument && this.activeDocument.uri.scheme !== 'inmemory'
-    );
+    return this.ignoreDocument(this.activeDocument);
+  }
+
+  private ignoreDocument(document: TextDocument | null): boolean {
+    Logger.debug('ignoreDocument:', document?.uri);
+    return !!document && document.uri.scheme !== 'inmemory';
   }
 }
 
