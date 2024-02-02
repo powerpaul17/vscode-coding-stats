@@ -110,6 +110,7 @@ export class EventHandler {
     const now = Date.now();
 
     if (textEditor?.document === this.activeDocument) return;
+    if (this.ignoreDocument(textEditor?.document ?? null)) return;
 
     this.changeActiveFile(now, textEditor?.document);
   }
