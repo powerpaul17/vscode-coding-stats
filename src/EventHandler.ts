@@ -127,7 +127,7 @@ export class EventHandler {
     this.activeDocument = newDocument;
 
     this.trackingData.openTimestamp = now;
-    this.trackingData.lastReadingTimestamp = now;
+    this.updateReadingTime(now);
   }
 
   private getActiveDocumentData(
@@ -197,19 +197,31 @@ export class EventHandler {
   }
 
   private updateReadingTime(now: number): void {
-    if (
-      this.trackingData.lastReadingTimestamp + EventHandler.READING_TIMEOUT >=
-      now
-    ) {
-      this.trackingData.readingTime +=
-        now - this.trackingData.lastReadingTimestamp;
+    if (!!this.trackingData.lastCodingTimestamp) {
+      if (!this.codingTimeoutReached(now)) {
+        this.updateCodingTimeWithDifference(now);
+      } else {
+        this.trackingData.codingTime += EventHandler.CODING_TIMEOUT;
+        this.trackingData.lastCodingTimestamp = 0;
+        this.trackingData.lastReadingTimestamp = now;
+      }
+
+      this.trackingData.lastReadingTimestamp = 0;
     } else {
-      this.trackingData.readingTime += EventHandler.READING_TIMEOUT;
+      if (!!this.trackingData.lastReadingTimestamp) {
+        if (!this.readingTimeoutReached(now)) {
+          this.updateReadingTimeWithDifference(now);
+          this.trackingData.lastReadingTimestamp = now;
+        } else {
+          this.trackingData.readingTime += EventHandler.READING_TIMEOUT;
+          this.trackingData.lastReadingTimestamp = 0;
+        }
+      } else {
+        this.trackingData.lastReadingTimestamp = now;
+      }
     }
 
     this.uploadTrackingDataIfNecessary(now);
-
-    this.trackingData.lastReadingTimestamp = now;
   }
 
   private onFileChange(event: TextDocumentChangeEvent): void {
@@ -237,7 +249,8 @@ export class EventHandler {
     );
     // this.activeDocument.lineCount = event.document.lineCount;
 
-    this.updateCodingTime();
+    const now = Date.now();
+    this.updateCodingTime(now);
   }
 
   private analyzeDocumentContentChanges(
@@ -275,23 +288,57 @@ export class EventHandler {
     );
   }
 
-  private updateCodingTime(): void {
-    const now = Date.now();
+  private updateCodingTime(now: number): void {
+    if (!!this.trackingData.lastReadingTimestamp) {
+      if (!this.readingTimeoutReached(now)) {
+        this.updateReadingTimeWithDifference(now);
+      } else {
+        this.trackingData.readingTime += EventHandler.READING_TIMEOUT;
+      }
 
-    if (
-      this.trackingData.lastCodingTimestamp + EventHandler.CODING_TIMEOUT >=
-      now
-    ) {
-      this.trackingData.codingTime +=
-        now - this.trackingData.lastCodingTimestamp;
+      this.trackingData.lastReadingTimestamp = 0;
+      this.trackingData.lastCodingTimestamp = now;
+    } else {
+      if (!!this.trackingData.lastCodingTimestamp) {
+        if (!this.codingTimeoutReached(now)) {
+          this.updateCodingTimeWithDifference(now);
+          this.trackingData.lastCodingTimestamp = now;
+        } else {
+          this.trackingData.codingTime += EventHandler.CODING_TIMEOUT;
+          this.trackingData.lastCodingTimestamp = 0;
+        }
+      } else {
+        this.trackingData.lastCodingTimestamp = now;
+      }
     }
 
     this.uploadTrackingDataIfNecessary(now);
+  }
 
-    this.trackingData.lastCodingTimestamp = now;
+  private readingTimeoutReached(now: number): boolean {
+    return (
+      !!this.trackingData.lastReadingTimestamp &&
+      this.trackingData.lastReadingTimestamp + EventHandler.READING_TIMEOUT <
+        now
+    );
+  }
 
-    // coding also counts as reading? ;)
-    this.trackingData.lastReadingTimestamp = now;
+  private codingTimeoutReached(now: number): boolean {
+    return (
+      !!this.trackingData.lastCodingTimestamp &&
+      this.trackingData.lastCodingTimestamp + EventHandler.CODING_TIMEOUT < now
+    );
+  }
+
+  private updateReadingTimeWithDifference(now: number): void {
+    if (!this.trackingData.lastReadingTimestamp) return;
+    this.trackingData.readingTime +=
+      now - this.trackingData.lastReadingTimestamp;
+  }
+
+  private updateCodingTimeWithDifference(now: number): void {
+    if (!this.trackingData.lastCodingTimestamp) return;
+    this.trackingData.codingTime += now - this.trackingData.lastCodingTimestamp;
   }
 
   private uploadTrackingDataIfNecessary(now: number): void {
