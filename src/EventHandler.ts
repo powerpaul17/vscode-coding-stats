@@ -362,6 +362,13 @@ export class EventHandler {
   }
 
   private uploadTrackingData(): void {
+    const now = Date.now();
+    if (this.trackingData.lastCodingTimestamp) {
+      this.updateCodingTimeWithDifference(now);
+    } else if (this.trackingData.lastReadingTimestamp) {
+      this.updateReadingTimeWithDifference(now);
+    }
+
     const activeDocumentData = this.getActiveDocumentData(this.activeDocument);
 
     if (activeDocumentData && this.shouldUploadDocument()) {
@@ -371,6 +378,7 @@ export class EventHandler {
         this.trackingData
       );
     }
+
     this.resetTrackingData();
   }
 
