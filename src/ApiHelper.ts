@@ -21,9 +21,9 @@ export class ApiHelper {
     });
   }
 
-  public async getData(from, to): Promise<ResponseData> {
+  public async getData(from: number, to: number): Promise<ResponseData> {
     const response = await this.requestHelper.makeRequest<ResponseData>({
-      endpoint: `api/collections/data/records?filter=(date='${from}')`,
+      endpoint: `api/collections/records/records?filter=timestamp>=${from}&&timestamp<=${to}&skipTotal=true&perPage=1000`,
       authorizationToken: await this.getAuthorizationToken()
     });
 

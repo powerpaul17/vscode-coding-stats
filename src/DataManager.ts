@@ -33,15 +33,15 @@ export class DataManager {
   }
 
   private async updateData(): Promise<void> {
-    this.data = await this.getDataForDayRange(moment().format('YYYY-MM-DD'));
+    this.data = await this.getDataForToday();
     this.publish();
   }
 
-  private async getDataForDayRange(from: MomentInput, to?: MomentInput): Promise<Data|null> {
-    if(!to) to = from;
+  private async getDataForToday(): Promise<Data|null> {
+    const todayDate = moment().hours(0).minutes(0).seconds(0);
 
     try {
-      const data = await this.apiHelper.getData(from, to);
+      const data = await this.apiHelper.getData(todayDate.unix() * 1000, todayDate.add(1, 'day').unix() * 1000);
       return this.analyzeReponseData(data);
     } catch(error) {
       // TODO
