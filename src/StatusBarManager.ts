@@ -68,7 +68,7 @@ export class StatusBarManager {
   private getStatusBarText(): string {
     return [
       '$(dashboard)',
-      `${this.data ? Utils.getTimeString(this.data.sum.codingTime + this.data.sum.readingTime) : ''}`,
+      `${this.data ? `${Utils.getTimeString(this.data.sum.codingTime)} / ${Utils.getTimeString(this.data.sum.readingTime)}` : ''}`,
       this.getUploaderStatusIcon(),
       `${this.uploaderStatus?.pendingItems ? `${this.uploaderStatus.pendingItems}` : ''}`
     ].join(' ');
