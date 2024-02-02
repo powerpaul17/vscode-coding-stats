@@ -247,7 +247,9 @@ export class EventHandler {
     this.analyzeDocumentContentChanges(event.contentChanges.slice());
 
     Logger.debug(
-      'active document: lineCount:',
+      'active document:',
+      this.activeDocument.uri,
+      '; lineCount:',
       this.activeDocument.lineCount,
       '; length:',
       this.activeDocument.getText().length
